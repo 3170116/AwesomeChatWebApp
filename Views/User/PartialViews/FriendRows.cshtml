@@ -1,0 +1,31 @@
+﻿@model AwesomeChat.ViewModels.ProfileVM
+
+
+
+@foreach (var friend in Model.User.Friends)
+{
+
+    <div class="col-12 card" style="margin: 0.5em 0 0.5em 0;">
+
+        <div class="card-body">
+
+            <b class="card-title">
+                @friend.NickName
+                <span style="margin-left: 0.5em; cursor: pointer;" onclick="showChat(@Model.User.GetCommonChatGroupId(friend),@friend.Id)">
+                    <i class="fa fa-comment"></i>
+                </span>
+            </b>
+
+            <p class="card-subtitle text-muted" style="font-size: 0.8em;">
+                @(friend.IsOnline ? "Είναι online" : friend.GetActiveString())
+            </p>
+
+            <i id="newMsg_@Model.User.GetCommonChatGroupId(friend)">
+
+            </i>
+
+        </div>
+    </div>
+
+}
+

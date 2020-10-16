@@ -1,0 +1,67 @@
+﻿@model AwesomeChat.ViewModels.ProfileVM
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="row" style="margin: auto;">
+
+    <div class="col-12 card" style="border: none;">
+
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-12">
+
+                    <a href="@Url.Action("Profile", "User")" class="h5" style="float: left; cursor: pointer; color: black;">
+                        <i class="fa fa-user">
+                            @Model.User.NickName
+                        </i>
+                    </a>
+
+                    <a href="@Url.Action("Edit", "Account")" style="margin-left: 0.5em;">
+                        <i class="fa fa-edit" style="vertical-align: bottom;"></i>
+                    </a>
+
+                    <a href="@Url.Action("Logout", "Account")" style="float: right;">
+                        Αποσύνδεση
+                        <i class="fa fa-sign-out"></i>
+                    </a>
+
+                </div>
+            </div>
+
+            <div id="searchUserDiv" class="row justify-content-center">
+                <div class="col-md-4 col-sm-12">
+
+                    <form method="get" action="@Url.Action("Search", "User")">
+                        <ul style="list-style: none; box-shadow: 0 4px 10px 0 rgba(0,0,0,0.2); padding: 1em; width: auto; margin: 1em auto 0 auto;">
+                            <li style="display: inline;">
+                                <i class="fa fa-search"></i>
+                            </li>
+                            <li style="display: inline;">
+                                @Html.TextBoxFor(x => x.SearchText, new { @style = "border: 1px solid #ced4da; outline: none; padding: 0.3em; width: 90%;", @placeholder = "Αναζήτηση...", @autoComplete = "off" })
+                            </li>
+                        </ul>
+                    </form>
+
+                </div>
+            </div>
+
+
+            <div class="row" style="margin-top: 1em;">
+
+                @RenderSection("Body", required: false)
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script type="text/javascript" src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+
+@RenderSection("Scripts", required: false)

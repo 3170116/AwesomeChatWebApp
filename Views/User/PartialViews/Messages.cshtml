@@ -1,0 +1,31 @@
+﻿@model AwesomeChat.ViewModels.MessagesVM
+
+
+    <div class="row">
+
+        @foreach (var msg in Model.Messages)
+        {
+            <div id="msgItem_@msg.Id" class="col-12">
+                <div class="card-body" style="padding: 0.5em 0 0 0;">
+
+                    <div class="card-title" style="@(Model.IsMessageMine(msg) ? "float: right;" : "") border-radius: 1.5em; border: 1px solid #888888; padding: 0.5em; width: fit-content; margin: 0.7em;">
+                        @msg.Body
+                    </div>
+
+                </div>
+            </div>
+        }
+
+    </div>
+
+
+    <script type="text/javascript">
+
+        @if (Model.Messages.Any())
+        {
+            <text>
+                document.getElementById('msgItem_' + @Model.Messages.Last().Id).scrollIntoView();
+            </text>
+        }
+
+    </script>

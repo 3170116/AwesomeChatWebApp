@@ -1,0 +1,198 @@
+﻿@model AwesomeChat.ViewModels.ProfileVM
+
+@{
+    Layout = "~/Views/Shared/_ProfileLayout.cshtml";
+}
+
+
+@section Body {
+
+    <input type="hidden" id="openChat" value="@(Model.User.Friends.Any() ? Model.User.GetCommonChatGroupId(Model.User.Friends.First()) : 0)" />
+
+    <div id="friends_requests" class="col-md-4 col-sm-12">
+
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <a class="nav-item nav-link active" id="nav-friends-tab" data-toggle="tab" href="#nav-friends" role="tab" aria-controls="nav-friends" aria-selected="true">Φίλοι</a>
+                <a class="nav-item nav-link" id="nav-requests-tab" data-toggle="tab" href="#nav-requests" role="tab" aria-controls="nav-requests" aria-selected="false">Αιτήματα φιλίας</a>
+            </div>
+        </nav>
+
+        <div class="tab-content" id="nav-tabContent">
+
+            <div class="tab-pane fade show active" id="nav-friends" role="tabpanel" aria-labelledby="nav-friends-tab">
+
+                @if (!Model.User.Friends.Any())
+                {
+                    <p>
+                        Δεν έχετε κάποιον φίλο ακόμα
+                    </p>
+                }
+                else
+                {
+
+                    @Html.Partial("~/Views/User/PartialViews/FriendRows.cshtml", Model)
+
+                }
+
+            </div>
+
+            <div class="tab-pane fade" id="nav-requests" role="tabpanel" aria-labelledby="nav-requests-tab">
+
+                @if (!Model.User.Requests.Any())
+                {
+                    <p>
+                        Δεν υπάρχει κάποιο αίτημα φιλίας
+                    </p>
+                }
+                else
+                {
+
+                    @Html.Partial("~/Views/User/PartialViews/RequestRows.cshtml", Model)
+                    
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="chat_room" class="col-md-8 col-sm-12 d-none d-lg-block">
+
+        @if (Model.User.Friends.Any())
+        {
+            @Html.Partial("~/Views/User/PartialViews/Chat.cshtml", Model)
+        }
+
+    </div>
+
+}
+
+@section Scripts {
+
+    <script type="text/javascript">
+
+        var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+        window.onload = function () {
+
+
+            connection.on("ReceiveMessage", function (fromUserId, groupId) {
+
+                if (parseInt($('#openChat').val()) == groupId) {
+                    console.log(groupId);
+                    showChat(groupId);
+
+                } else {
+
+                    if (fromUserId != @Model.User.Id) {
+                        $('#newMsg_' + groupId).html('Έχετε ένα νέο μήνυμα');
+                    }
+
+                }
+
+            });
+
+            connection.start().then(function () {
+
+            }).catch(function (err) {
+                return console.error(err.toString());
+            });
+
+
+            this.document.getElementById('chat_room').style.height = window.innerHeigh;
+
+            @if (Model.User.Friends.Any())
+            {
+                <text>
+                    showChat(@Model.User.GetCommonChatGroupId(Model.User.Friends.First()));
+
+                    var myInternal = this.setInterval(function () {
+
+                        if (document.getElementById('chat_room').classList == 'col-md-8 col-sm-12 d-none d-lg-block') {
+                            clearInterval(myInternal);
+                        } else {
+                            hideChat();
+                            $('#openChat').prop('value', @Model.User.GetCommonChatGroupId(Model.User.Friends.First()))
+                        }
+
+                    }, 10);
+
+                </text>
+            }
+
+        }
+
+
+        function showChat(groupId) {
+
+            $('#newMsg_' + groupId).html('');
+
+            let myUrl = '/User/ShowMessages?groupId=' + groupId;
+
+            $.ajax({
+                url: myUrl,
+                type: 'get',
+                success: function (response) {
+
+                    $('#messages_' + groupId).html(response);
+                    $('#openChat').prop('value', groupId);
+
+                    document.getElementById('friends_requests').classList = 'col-md-4 col-sm-12 d-none d-lg-block';
+                    document.getElementById('chat_room').classList = 'col-md-8 col-sm-12 d-block';
+
+                    $('[id^=chat_]').hide();
+                    $('#chat_' + groupId).show();
+
+                },
+                error: function (data) {
+                    location.reload();
+                }
+            });
+
+        }
+
+        function hideChat() {
+
+            $('#openChat').prop('value', 0);
+
+            document.getElementById('friends_requests').classList = 'col-md-4 col-sm-12';
+            document.getElementById('chat_room').classList = 'col-md-8 col-sm-12 d-none d-lg-block';
+
+        }
+
+        function sendMessageToGroup(groupId) {
+
+            let msg = $('#msg_' + groupId).val();
+            console.log(msg);
+
+            if (msg.length == 0 || msg.trim().length == 0) {
+                return;
+            }
+
+
+            let myUrl = '/User/SendMessage?groupId=' + groupId + '&body=' + msg;
+
+            $.ajax({
+                url: myUrl,
+                type: 'post',
+                success: function (response) {
+
+                    $('#msg_' + groupId).prop('value', '');
+
+                    connection.invoke("SendMessage", @Model.User.Id, groupId).catch(function (err) {
+                        return console.error(err.toString());
+                    });
+
+                },
+                error: function (data) {
+                    location.reload();
+                }
+            });
+
+        }
+
+    </script>
+
+}

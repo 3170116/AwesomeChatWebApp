@@ -1,0 +1,112 @@
+﻿@model AwesomeChat.ViewModels.SearchVM
+
+
+    @if (!Model.Results.Any())
+    {
+        <p>
+            Δε βρέθηκε κανένα αποτέλεσμα
+        </p>
+    }
+    else
+    {
+        foreach (var result in Model.Results)
+        {
+
+            <div class="col-sm-12 col-md-4 card">
+
+                <div class="card-body">
+
+                    <b class="card-title">
+                        @result.NickName
+                    </b>
+
+                    @if (!Model.User.Friends.Any(x => x.Id == result.Id))
+                    {
+
+                        var request = Model.User.Requests.SingleOrDefault(x => x.SendFromUserId == result.Id);
+
+                        if (request != null)
+                        {
+                            <p class="card-text">
+                                Σας έχει στείλει ήδη αίτημα φιλίας
+                            </p>
+                        }
+                        else
+                        {
+                            var invitation = Model.User.Invitations.SingleOrDefault(x => x.SendToUserId == result.Id);
+
+                            <p id="text_@result.Id" class="card-text" style="@(invitation == null ? "display: none;": "")">
+                                Έχετε στείλει ήδη αίτημα φιλίας
+                            </p>
+
+                            @if (invitation != null)
+                            {
+
+                                <button id="cancelInvitationBtn_@invitation.Id" class="btn btn-sm btn-danger card-link" onclick="deleteInvitation(@result.Id,@invitation.Id)">
+                                    Ακύρωση αιτήματος
+                                </button>
+                            }
+                            else
+                            {
+                                <button id="sendInvitationBtn_@result.Id" class="btn btn-sm btn-info card-link" onclick="sendInvitation(@Model.User.Id, @result.Id)">
+                                    Στείλτε αίτημα φιλίας
+                                </button>
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        <p class="card-text">
+                            Είστε φίλοι
+                        </p>
+                    }
+
+                </div>
+            </div>
+
+        }
+    }
+
+
+    <script type="text/javascript">
+
+        function sendInvitation(fromUserId, toUserId) {
+
+            let myUrl = '/User/SendInvitation?fromUserId=' + fromUserId + '&toUserId=' + toUserId;
+
+            $.ajax({
+                url: myUrl,
+                type: 'post',
+                success: function (response) {
+                    $('#sendInvitationBtn_' + toUserId).hide();
+                    $('#text_' + toUserId).html('Το αίτημα στάλθηκε');
+                    $('#text_' + toUserId).show();
+                },
+                error: function (data) {
+                    location.reload();
+                }
+            });
+
+        }
+
+        function deleteInvitation(toUserId, invitationId) {
+
+            let myUrl = '/User/DeleteInvitation?invitationId=' + invitationId;
+
+            $.ajax({
+                url: myUrl,
+                type: 'post',
+                success: function (response) {
+                    $('#cancelInvitationBtn_' + invitationId).hide();
+                    $('#text_' + toUserId).html('Το αίτημα ακυρώθηκε');
+                    $('#text_' + toUserId).show();
+                },
+                error: function (data) {
+                    location.reload();
+                }
+            });
+
+        }
+
+    </script>

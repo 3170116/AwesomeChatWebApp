@@ -1,0 +1,34 @@
+﻿@model AwesomeChat.ViewModels.ProfileVM
+
+
+@foreach (var friend in Model.User.Friends)
+{
+
+    <div id="chat_@Model.User.GetCommonChatGroupId(friend)" class="row card" style="height: 100%">
+        <div class="col-12 card-body">
+
+            <p class="card-title" style="cursor: pointer; font-size: 1.3em;" onclick="hideChat();">
+                <i class="fa fa-long-arrow-left">
+                    &nbsp;&nbsp;@friend.NickName
+                </i>
+                <hr />
+            </p>
+
+            <div id="messages_@Model.User.GetCommonChatGroupId(friend)" style="height: 25em; overflow-x: hidden; overflow-y: scroll;">
+
+            </div>
+
+            <hr />
+            <div class="row" style="position: sticky; bottom: 0; z-index: 10; background-color: white;">
+                <div class="col-md-10" style="margin-bottom: 0.5em;">
+                    <input type="text" id="msg_@Model.User.GetCommonChatGroupId(friend)" class="form-control" placeholder="Γράψε εδώ..." />
+                </div>
+                <div class="col-md-2">
+                    <input id="chatBtn_@Model.User.GetCommonChatGroupId(friend)" type="button" class="btn btn-outline-primary" value="Αποστολή" style="float: right;" onclick="sendMessageToGroup(@Model.User.GetCommonChatGroupId(friend));" />
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+}

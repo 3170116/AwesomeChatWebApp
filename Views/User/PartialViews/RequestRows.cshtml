@@ -1,0 +1,53 @@
+﻿@model AwesomeChat.ViewModels.ProfileVM
+
+@foreach (var request in Model.User.Requests)
+{
+
+    <div class="col-12 card">
+
+        <div class="card-body">
+
+            <b class="card-title">
+                @request.SendFromUser.NickName
+            </b>
+
+            @if (!Model.User.Friends.Any(x => x.Id == request.SendFromUserId))
+            {
+
+                <p id="text_@request.Id" class="card-text" style="display: none;">
+                    Πλέον είστε φίλοι
+                </p>
+
+                <button id="acceptInvitationBtn_@request.Id" class="btn btn-sm btn-info card-link" onclick="acceptInvitation(@request.Id)">
+                    Αποδοχή Αιτήματος
+                </button>
+
+            }
+
+        </div>
+    </div>
+
+}
+
+
+<script type="text/javascript">
+
+    function acceptInvitation(requestId) {
+
+        let myUrl = '/User/ReplyToInvitation?requestId=' + requestId + '&accept=true';
+
+        $.ajax({
+            url: myUrl,
+            type: 'post',
+            success: function (response) {
+                $('#acceptInvitationBtn_' + requestId).hide();
+                $('#text_' + requestId).show();
+            },
+            error: function (data) {
+                location.reload();
+            }
+        });
+
+    }
+
+</script>
